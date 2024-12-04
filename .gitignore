@@ -1,0 +1,13 @@
+# Output
+
+## build
+.build
+
+## binairies
+crash
+debug
+check
+
+# Config
+compile_commands.json
+.pre-commit-config.yaml

@@ -1,0 +1,20 @@
+-Wall -Wextra
+
+-Wp,-U_FORTIFY_SOURCE
+
+-Wcast-qual
+-Wduplicated-branches
+-Wduplicated-cond
+-Wformat=2
+-Wmissing-prototypes
+-Wshadow
+-Wstrict-aliasing=0
+-Wstrict-prototypes
+-Wunreachable-code
+-Wwrite-strings
+
+-Werror=declaration-after-statement
+-Werror=format-nonliteral
+-Werror=int-conversion
+-Werror=return-type
+-Werror=vla-larger-than=0
