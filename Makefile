@@ -7,7 +7,6 @@ CC := gcc
 
 CFLAGS += -std=c99 -pedantic
 CFLAGS += -iquote $/
-CFLAGS += -O2
 
 ifneq ($(EXPLICIT_FLAGS),1)
 CFLAGS += @$/base_warnings
@@ -35,15 +34,15 @@ include $/mk-recipes.mk
 
 release-flags := -O3 -DNDEBUG
 #? crash: build the release binary, crash
-$(eval $(call mk-binary, crash, SRC, $(release-flags)))
+$(eval $(call mk-recipe-binary, crash, SRC, $(release-flags)))
 
 #? debug: build with debug logs an eponym binary
-debug-flags := -fanalyzer -DDEBUG=1 -g3
-$(eval $(call mk-binary, debug, SRC, $(debug-flags)))
+debug-flags := -O2 -fanalyzer -DDEBUG=1 -g3
+$(eval $(call mk-recipe-binary, debug, SRC, $(debug-flags)))
 
 #? check: build with all warnings and sanitizers an eponym binary
 check-flags := $(debug-flags) -fsanitize=address,leak,undefined -Wpadded
-$(eval $(call mk-binary, check, SRC, $(check-flags)))
+$(eval $(call mk-recipe-binary, check, SRC, $(check-flags)))
 
 .PHONY: all
 all: $(out-crash)
@@ -76,8 +75,8 @@ help: #? help: show this help message
 
 #? install: package within the provided dir
 .PHONY: install
-install: $(OUT)
-	install -Dm755 -t $(PREFIX)/bin $(OUT)
+install: $(out-crash)
+	install -Dm755 -t $(PREFIX)/bin $(out-crash)
 
 ifneq ($(shell command -v tput),)
   ifneq ($(shell tput colors),0)

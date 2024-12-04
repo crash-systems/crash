@@ -22,25 +22,7 @@
     formatter = forAllSystems (pkgs: pkgs.alejandra);
 
     checks = forAllSystems (pkgs: let
-      pyrun = name: pkgs.python310.interpreter + " " + name;
-      hooks = {
-        alejandra.enable = true;
-        black.enable = true;
-        trim-trailing-whitespace.enable = true;
-
-        commit-name = {
-          enable = true;
-          name = "commit name";
-          stages = ["commit-msg"];
-          entry = pyrun ./scripts/check_commit_msg.py;
-        };
-
-        check-include-order = {
-          enable = true;
-          name = "commit name";
-          entry = pyrun ./scripts/check_include_order.py;
-        };
-      };
+      hooks = import ./nix/hooks.nix {inherit pkgs;};
     in {
       pre-commit-check = pre-commit-hooks.lib.${pkgs.system}.run {
         inherit hooks;
@@ -59,6 +41,12 @@
           gcovr
         ];
       };
+    });
+
+    packages = forAllSystems (pkgs: {
+      default = self.packages.${pkgs.system}.crash;
+      crash = pkgs.callPackage ./nix/crash.nix {};
+      bundle = pkgs.callPackage ./nix/crash.nix {withDevBinaries = true;};
     });
   };
 }

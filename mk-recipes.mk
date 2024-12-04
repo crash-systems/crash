@@ -17,14 +17,14 @@ $$(BUILD_DIR)/$(strip $1)/%.o: %.c
 		$$Q $$(CC) \
 		$$(CFLAGS) $$(CFLAGS_@$$(notdir $$(@:.o=))) $3 \
 		-o $$@ -c $$<
-	@ $$(LOG_TIME) "CC $$(C_PURPLE) $$(notdir $$@) $$(C_RESET)"
+	@ $$(log) "CC $$(C_PURPLE) $$(notdir $$@) $$(C_RESET)"
 
 $$(out-$(strip $1)): $$(obj-$(strip $1))
 	@ mkdir -p $$(dir $$@)
 	$$Q $$(CC) -o $$@ $$(obj-$(strip $1))              \
 		$$(CFLAGS) $$(CFLAGS_@$$(notdir $$(@:.o=))) $3 \
 		$$(LDLIBS) $$(LDFLAGS)
-	@ $$(LOG_TIME) "LD $$(C_GREEN) $$@ $$(C_RESET)"
+	@ $$(log) "LD $$(C_GREEN) $$@ $$(C_RESET)"
 
 _clean += $$(obj-$(strip $1))
 _fclean += $$(out-$(strip $1))
