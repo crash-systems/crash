@@ -37,7 +37,7 @@ release-flags := -O3 -DNDEBUG
 $(eval $(call mk-recipe-binary, crash, SRC, $(release-flags)))
 
 #? debug: build with debug logs an eponym binary
-debug-flags := -O2 -fanalyzer -DDEBUG=1 -g3
+debug-flags := -O2 -fanalyzer -DCR_DEBUG_MODE=1 -g3
 $(eval $(call mk-recipe-binary, debug, SRC, $(debug-flags)))
 
 #? check: build with all warnings and sanitizers an eponym binary
