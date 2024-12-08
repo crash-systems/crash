@@ -1,8 +1,13 @@
 #ifndef CR_VT100_ESC_CODES_H
     #define CR_VT100_ESC_CODES_H
 
-    #define CFMT(n) "\033[" #n "m"
+    #define ESC "\033"
+    #define CFMT(n) ESC "[" #n "m"
 
+    // move
+    #define MOVE_RIGHT(n) ESC "[" #n "C"
+
+    // colors
     #define RESET CFMT(0)
     #define BOLD CFMT(1)
 
