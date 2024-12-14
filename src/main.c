@@ -11,7 +11,7 @@
 
 static char const PROMPT[] = "->> ";
 
-#if defined CR_DEBUG
+#if defined CR_DEBUG_MODE
 static void show_input_buff(char const buff[static 1], size_t written)
 {
     CR_DEBUG("read %zd characters: [", written);

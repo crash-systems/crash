@@ -8,10 +8,16 @@ CC := gcc
 CFLAGS := -std=gnu2x -pedantic
 CFLAGS += -iquote $/src
 
+WARNING_FILE := $/base_warnings
+
 ifneq ($(EXPLICIT_FLAGS),1)
-CFLAGS += @$/base_warnings
+CFLAGS += @$(WARNING_FILE)
 else
-CFLAGS += $(shell cat base_flags.txt)
+CFLAGS += $(shell cat $(WARNING_FILE))
+endif
+
+ifneq ($(V),1)
+Q := @
 endif
 
 LDFLAGS := -fwhole-program
