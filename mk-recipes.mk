@@ -21,7 +21,7 @@ $$(BUILD_DIR)/$(strip $1)/%.o: %.c
 
 $$(out-$(strip $1)): $$(obj-$(strip $1))
 	@ mkdir -p $$(dir $$@)
-	$$Q $$(CC) -o $$@ $$(obj-$(strip $1))              \
+	$$Q $$(CC) -o $$@ $$(obj-$(strip $1)) \
 		$$(CFLAGS) $$(CFLAGS_@$$(notdir $$(@:.o=))) $3 \
 		$$(LDLIBS) $$(LDFLAGS)
 	@ $$(log) "LD $$(C_GREEN) $$@ $$(C_RESET)"

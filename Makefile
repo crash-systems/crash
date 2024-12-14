@@ -5,8 +5,8 @@ BUILD_DIR := $/.build
 
 CC := gcc
 
-CFLAGS += -std=c99 -pedantic
-CFLAGS += -iquote $/
+CFLAGS := -std=gnu2x -pedantic
+CFLAGS += -iquote $/src
 
 ifneq ($(EXPLICIT_FLAGS),1)
 CFLAGS += @$/base_warnings
@@ -19,8 +19,8 @@ LDFLAGS += -Wl,--gc-sections
 
 LDLIBS += -lc
 
-SRC := $(shell find $/src -type f -name "*.c")
-OBJ := $(SRC:%.c=$(BUILD_DIR)/release/%.o)
+SRC := $(shell find $/src -type f -name "*.c" -printf '%P\n')
+vpath  %.c $/src
 
 ifneq (,$(shell find . -maxdepth 1 -type f -name ".fast"))
 MAKEFLAGS += -j
@@ -38,6 +38,7 @@ $(eval $(call mk-recipe-binary, crash, SRC, $(release-flags)))
 
 #? debug: build with debug logs an eponym binary
 debug-flags := -O2 -fanalyzer -DCR_DEBUG_MODE=1 -g3
+
 $(eval $(call mk-recipe-binary, debug, SRC, $(debug-flags)))
 
 #? check: build with all warnings and sanitizers an eponym binary
