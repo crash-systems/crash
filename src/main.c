@@ -69,7 +69,7 @@ bool cr_getline(buff_t *buff)
     if (!ensure_capacity(buff))
         return false;
     while (*read_buff != '\n' && *read_buff != '\r') {
-        read_size = read(STDOUT_FILENO, &read_buff, sizeof read_buff);
+        read_size = read(STDIN_FILENO, &read_buff, sizeof read_buff);
         if (!read_size)
             return false;
         CR_DEBUG_CALL(show_input_buff, read_buff, read_size);
@@ -83,17 +83,23 @@ bool cr_getline(buff_t *buff)
 
 int main(int argc CR_DEBUG_USED, char **argv CR_DEBUG_USED)
 {
-    struct termios init_settings;
+    struct termios base_settings;
+    struct termios repl_settings;
     buff_t cmd_buff = { .str = NULL, 0 };
 
     CR_DEBUG("running: %s, %d arg(s).\n", *argv, argc);
-    tcgetattr(STDIN_FILENO, &init_settings);
-    init_settings.c_iflag = IXON;
-    init_settings.c_lflag = ~(ECHO | ICANON);
-    tcsetattr(STDIN_FILENO, TCSANOW, &init_settings);
+    if (isatty(STDIN_FILENO)) {
+        tcgetattr(STDIN_FILENO, &base_settings);
+        repl_settings = base_settings;
+        repl_settings.c_iflag = IXON;
+        repl_settings.c_lflag = ~(ECHO | ICANON);
+        tcsetattr(STDIN_FILENO, TCSANOW, &repl_settings);
+    }
     write(STDOUT_FILENO, PROMPT, sizeof PROMPT);
     cr_getline(&cmd_buff);
     write(STDOUT_FILENO, "\n", 1);
     CR_DEBUG("cmd buff: [%s]\n", cmd_buff.str);
+    if (isatty(STDIN_FILENO))
+        tcsetattr(STDIN_FILENO, TCSANOW, &base_settings);
     return EXIT_SUCCESS;
 }
