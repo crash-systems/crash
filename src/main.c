@@ -11,22 +11,18 @@
 
 static char const PROMPT[] = "->> ";
 
-#define XCAT(n) #n
-#define CAT(n) XCAT(n)
-
-static
-__attribute__((unused))
-void show_input_buff(char *buff, size_t written)
+#if defined CR_DEBUG
+static void show_input_buff(char const buff[static 1], size_t written)
 {
-    CR_DEBUG("read %zd characters:", written);
-    fprintf(stderr, "[");
+    CR_DEBUG("read %zd characters: [", written);
     for (size_t i = 0; i < written; i++) {
         if (i)
-            fprintf(stderr, " ");
-        fprintf(stderr, "%.2x", buff[i]);
+            dprintf(STDERR_FILENO, " ");
+        dprintf(STDERR_FILENO, "%.2x", buff[i]);
     }
-    fprintf(stderr, "]\n");
+    dprintf(STDERR_FILENO, "]\n");
 }
+#endif
 
 static
 size_t strcpy_printable(char *dest, char *src)
@@ -85,23 +81,19 @@ bool cr_getline(buff_t *buff)
     return true;
 }
 
-#ifdef CR_DEBUG_MODE
-int main(int argc, char **argv)
-#else
-int main(void)
-#endif
+int main(int argc CR_DEBUG_USED, char **argv CR_DEBUG_USED)
 {
     struct termios init_settings;
     buff_t cmd_buff = { .str = NULL, 0 };
 
-    CR_DEBUG("running: %s, %d arg(s).", *argv, argc);
+    CR_DEBUG("running: %s, %d arg(s).\n", *argv, argc);
     tcgetattr(STDIN_FILENO, &init_settings);
     init_settings.c_iflag = IXON;
     init_settings.c_lflag = ~(ECHO | ICANON);
     tcsetattr(STDIN_FILENO, TCSANOW, &init_settings);
     write(STDOUT_FILENO, PROMPT, sizeof PROMPT);
     cr_getline(&cmd_buff);
-    CR_DEBUG("cmd buff: %s", cmd_buff.str);
     write(STDOUT_FILENO, "\n", 1);
+    CR_DEBUG("cmd buff: [%s]\n", cmd_buff.str);
     return EXIT_SUCCESS;
 }
