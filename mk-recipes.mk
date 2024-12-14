@@ -10,11 +10,13 @@ _fclean :=
 define mk-recipe-binary
 
 obj-$(strip $1) := $$($(strip $2):%.c=$$(BUILD_DIR)/$(strip $1)/%.o)
+dep-$(strip $1) := $$(obj-$(strip $1):%.o=%.d)
+
 out-$(strip $1) := $(strip $1)
 
 $$(BUILD_DIR)/$(strip $1)/%.o: %.c
 	@ mkdir -p $$(dir $$@)
-		$$Q $$(CC) \
+		$$Q $$(CC) -MMD \
 		$$(CFLAGS) $$(CFLAGS_@$$(notdir $$(@:.o=))) $3 \
 		-o $$@ -c $$<
 	@ $$(log) "CC $$(C_PURPLE) $$(notdir $$@) $$(C_RESET)"
@@ -28,5 +30,7 @@ $$(out-$(strip $1)): $$(obj-$(strip $1))
 
 _clean += $$(obj-$(strip $1))
 _fclean += $$(out-$(strip $1))
+
+-include $$(dep-$(strip $1))
 
 endef
