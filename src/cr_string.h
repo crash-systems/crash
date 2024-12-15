@@ -8,4 +8,10 @@ typedef struct {
     size_t count;
     size_t cap;
 } buff_t;
+
+typedef struct {
+    char **args;
+    size_t count;
+    size_t cap;
+} args_t;
 #endif

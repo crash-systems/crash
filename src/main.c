@@ -6,8 +6,9 @@
 #include <termio.h>
 #include <unistd.h>
 
-#include "debug.h"
+#include "command.h"
 #include "cr_string.h"
+#include "debug.h"
 
 static char const PROMPT[] = "->> ";
 
@@ -21,6 +22,15 @@ static void show_input_buff(char const buff[static 1], size_t written)
         dprintf(STDERR_FILENO, "%.2x", buff[i]);
     }
     dprintf(STDERR_FILENO, "]\n");
+}
+
+static void show_command_args(args_t *command)
+{
+    CR_DEBUG("command count %zu\n", command->count);
+    CR_DEBUG_MSG("cmd args: ");
+    for (size_t i = 0; i < command->count; i++)
+        dprintf(STDERR_FILENO, "[%s] ", command->args[i]);
+    dprintf(STDERR_FILENO, "\n");
 }
 #endif
 
@@ -86,6 +96,7 @@ int main(int argc CR_DEBUG_USED, char **argv CR_DEBUG_USED)
     struct termios base_settings;
     struct termios repl_settings;
     buff_t cmd_buff = { .str = NULL, 0 };
+    args_t command;
 
     CR_DEBUG("running: %s, %d arg(s).\n", *argv, argc);
     if (isatty(STDIN_FILENO)) {
@@ -99,6 +110,12 @@ int main(int argc CR_DEBUG_USED, char **argv CR_DEBUG_USED)
     cr_getline(&cmd_buff);
     write(STDOUT_FILENO, "\n", 1);
     CR_DEBUG("cmd buff: [%s]\n", cmd_buff.str);
+    command = command_parse_args(cmd_buff.str);
+    if (command.args == NULL)
+        return EXIT_FAILURE;
+    CR_DEBUG_CALL(show_command_args, &command);
+    command_execute(&command, NULL, NULL);
+    free(command.args);
     if (isatty(STDIN_FILENO))
         tcsetattr(STDIN_FILENO, TCSANOW, &base_settings);
     return EXIT_SUCCESS;
