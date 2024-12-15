@@ -88,7 +88,7 @@ bool cr_getline(buff_t *buff)
         if (read_size <= 0)
             return (bool)(!read_size);
         if (*read_buff == CTRL('d'))
-            return write(STDOUT_FILENO, SSTR_UNPACK("exit")), true;
+            return write(STDOUT_FILENO, SSTR_UNPACK("exit\n")), true;
         CR_DEBUG_CALL(show_input_buff, read_buff, read_size);
         write(STDOUT_FILENO, read_buff, read_size);
         if (!ensure_capacity(buff))
@@ -114,17 +114,23 @@ int main(int argc CR_DEBUG_USED, char **argv CR_DEBUG_USED, char **env)
         repl_settings.c_lflag = ~(ECHO | ICANON);
         tcsetattr(STDIN_FILENO, TCSANOW, &repl_settings);
     }
-    write(STDOUT_FILENO, PROMPT, sizeof PROMPT);
-    succeed = cr_getline(&cmd_buff);
-    write(STDOUT_FILENO, "\n", 1);
-    CR_DEBUG("cmd buff: [%s]\n", cmd_buff.str);
-    command = command_parse_args(cmd_buff.str);
-    if (command.args == NULL)
-        return EXIT_FAILURE;
-    CR_DEBUG_CALL(show_command_args, &command);
-    command_execute(&command, env, NULL);
-    CR_DEBUG("cmd buff: (%zu)[%s]\n", cmd_buff.count, cmd_buff.str);
-    free(command.args);
+    while (1) {
+        command = (args_t){ 0 };
+        cmd_buff = (buff_t){ .str = NULL, 0 };
+        write(STDOUT_FILENO, PROMPT, sizeof PROMPT);
+        succeed = cr_getline(&cmd_buff);
+        if (cmd_buff.count == 0)
+            return EXIT_SUCCESS;
+        write(STDOUT_FILENO, "\n", 1);
+        CR_DEBUG("cmd buff: [%s]\n", cmd_buff.str);
+        command = command_parse_args(cmd_buff.str);
+        if (command.args == NULL)
+            return EXIT_FAILURE;
+        CR_DEBUG_CALL(show_command_args, &command);
+        command_execute(&command, env, NULL);
+        CR_DEBUG("cmd buff: (%zu)[%s]\n", cmd_buff.count, cmd_buff.str);
+        free(command.args);
+    }
     if (isatty(STDIN_FILENO))
         tcsetattr(STDIN_FILENO, TCSANOW, &base_settings);
     return (!succeed) ? EXIT_FAILURE : EXIT_SUCCESS;
