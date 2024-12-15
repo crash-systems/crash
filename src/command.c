@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -7,6 +8,7 @@
 #include <unistd.h>
 
 #include "command.h"
+#include "debug.h"
 
 static
 int ensure_args_capacity(args_t *command)
@@ -18,10 +20,10 @@ int ensure_args_capacity(args_t *command)
         if (ptr == NULL)
             return 0;
         command->args = ptr;
+        command->cap <<= 1;
+        command->args[command->count] = NULL;
     }
-    for (size_t i = command->count; i < command->cap; i++)
-        command->args[i] = NULL;
-    return command->cap << 1;
+    return command->cap;
 }
 
 args_t command_parse_args(char *buff)
@@ -40,6 +42,8 @@ args_t command_parse_args(char *buff)
         command.args[command.count] = tok;
         command.count++;
     }
+    CR_DEBUG("Command: [%s] with %zu args\n",
+        command.args[0], command.count);
     return command;
 }
 
@@ -60,13 +64,15 @@ bool command_execute(args_t *command, char **env, char **path)
     int status;
     pid_t pid = fork();
 
+    if (command->args[0] == NULL)
+        return false;
     if (pid == 0) {
-        if (command->args == NULL)
-            return false;
-        if (execve(command->args[0], command->args, NULL) == -1)
+        assert(command->args[0] != NULL);
+        if (execve(command->args[0], command->args, env) == -1)
             command_handler_errors(command->args[0]);
     } else if (pid > 0) {
         waitpid(pid, &status, 0);
+        exit(EXIT_SUCCESS);
         return true;
     }
     return false;

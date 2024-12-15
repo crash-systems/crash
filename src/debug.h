@@ -13,7 +13,7 @@
 
         #define HEAD_FMT HEAD_FMT_FILE HEAD_FMT_LINE "  "
 
-        #define ERR(fmt, ...) dprintf(STDERR_FILENO, fmt, __VA_ARGS__)
+        #define ERR(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
         #define DEBUG_INTERNAL(fmt, ...) ERR(HEAD_FMT fmt, HEAD, __VA_ARGS__)
 
         #define CR_DEBUG(fmt, ...) DEBUG_INTERNAL(fmt, __VA_ARGS__)

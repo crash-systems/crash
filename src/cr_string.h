@@ -14,4 +14,7 @@ typedef struct {
     size_t count;
     size_t cap;
 } args_t;
+
+bool cr_getline(buff_t *buff);
+
 #endif
