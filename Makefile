@@ -85,6 +85,34 @@ help: #? help: show this help message
 install: $(out-crash)
 	install -Dm755 -t $(PREFIX)/bin $(out-crash)
 
+$(eval $(call mk-recipe-binary, afl_runner, SRC, $(afl-flags)))
+
+#? afl: compile fuzzer binary
+.PHONY: afl
+afl: CC := afl-gcc-fast
+afl: afl_runner
+
+AFL_FLAGS := -i afl/input
+AFL_FLAGS += -x afl/tokens
+AFL_FLAGS += -o afl/generated
+
+define newline
+
+
+endef
+
+AFL_PROCS ?= $(shell nproc)
+
+.PHONY: afl_run
+afl_run: afl_runner
+	screen -dmS main_instance \
+		afl-fuzz $(AFL_FLAGS) -M fuzzer_1 -- ./afl_runner
+	$(foreach instance, $(shell seq 1 $(AFL_PROCS)),\
+		screen -dmS afl_$(instance) \
+		afl-fuzz $(AFL_FLAGS) -S fuzzer_$(instance) -- ./afl_runner$(newline))
+	watch -n 0.25 -- afl-whatsup -s afl/generated
+
+
 ifneq ($(shell command -v tput),)
   ifneq ($(shell tput colors),0)
 

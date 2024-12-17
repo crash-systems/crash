@@ -8,6 +8,7 @@
 crash
 debug
 check
+afl_runner
 
 # Config
 compile_commands.json

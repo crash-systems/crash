@@ -1,20 +1,23 @@
--Wall -Wextra
-
 -Wp,-U_FORTIFY_SOURCE
+-Wformat=2
+
+-Wall
+-Wextra
 
 -Wcast-qual
+
 -Wduplicated-branches
 -Wduplicated-cond
--Wformat=2
--Wmissing-prototypes
--Wshadow
--Wstrict-aliasing=0
--Wstrict-prototypes
--Wunreachable-code
--Wwrite-strings
 
--Werror=declaration-after-statement
+-fvisibility=hidden
+-Wmissing-prototypes
+-Wstrict-prototypes
+
+-Wwrite-strings
+-Wstrict-aliasing=0
+-Wshadow
+-Wunreachable-code
+
 -Werror=format-nonliteral
 -Werror=int-conversion
 -Werror=return-type
--Werror=vla-larger-than=0
