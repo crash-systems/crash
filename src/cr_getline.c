@@ -82,8 +82,13 @@ bool cr_getline(buff_t *buff)
     while (*read_buff != '\n' && *read_buff != '\r') {
         bzero(read_buff, sizeof read_buff);
         read_size = read(STDIN_FILENO, &read_buff, sizeof read_buff);
-        if (read_size <= 0)
-            return (bool)(!read_size);
+        CR_DEBUG("read count: %zd\n", read_size);
+        if (read_size < 0)
+            return false;
+        if (read_size == 0) {
+            buff->count = 0;
+            return true;
+        }
         if (*read_buff == CTRL('d'))
             return write(STDOUT_FILENO, SSTR_UNPACK("exit\n")), true;
         CR_DEBUG_CALL(show_input_buff, read_buff, read_size);
@@ -92,5 +97,6 @@ bool cr_getline(buff_t *buff)
             return false;
         buff->count += strcpy_printable(buff->str + buff->count, read_buff);
     }
+    CR_DEBUG("buff count: %zu\n", buff->count);
     return append_null_terminator(buff);
 }

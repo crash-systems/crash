@@ -85,11 +85,11 @@ help: #? help: show this help message
 install: $(out-crash)
 	install -Dm755 -t $(PREFIX)/bin $(out-crash)
 
-$(eval $(call mk-recipe-binary, afl_runner, SRC, $(afl-flags)))
+$(eval $(call mk-recipe-binary, afl_runner, SRC, $(debug-flags)))
 
 #? afl: compile fuzzer binary
 .PHONY: afl
-afl: CC := afl-gcc-fast
+afl: CC := AFL_USE_ASAN=1 afl-gcc-fast
 afl: afl_runner
 
 AFL_FLAGS := -i afl/input
@@ -105,6 +105,7 @@ AFL_PROCS ?= $(shell nproc)
 
 .PHONY: afl_run
 afl_run: afl_runner
+	@ mkdir -p afl/generated
 	screen -dmS main_instance \
 		afl-fuzz $(AFL_FLAGS) -M fuzzer_1 -- ./afl_runner
 	$(foreach instance, $(shell seq 1 $(AFL_PROCS)),\
