@@ -3,14 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <termio.h>
+#include <termios.h>
 #include <unistd.h>
 
 #include "common.h"
 #include "cr_string.h"
 #include "debug.h"
 
-#if defined CR_DEBUG_MODE
 static void show_input_buff(char const buff[static 1], size_t written)
 {
     CR_DEBUG("read %zd characters: [", written);
@@ -23,7 +22,6 @@ static void show_input_buff(char const buff[static 1], size_t written)
     if (*buff == '\033')
         CR_DEBUG("Detected ascii sequence: [\\033%s]\n", &buff[1]);
 }
-#endif
 
 static
 size_t strcpy_printable(char *dest, char *src)
