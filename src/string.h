@@ -1,5 +1,6 @@
 #ifndef CR_STRING_H
     #define CR_STRING_H
+    #include <stdbool.h>
     #include <stddef.h>
     #define CR_BUFF_INIT_SZ 128
 
@@ -16,5 +17,7 @@ typedef struct {
 } args_t;
 
 bool cr_getline(buff_t *buff);
+bool ensure_buff_capacity(buff_t *buff);
+bool ensure_buff_av_capacity(buff_t *buff, size_t requested);
 
 #endif

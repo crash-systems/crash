@@ -4,7 +4,7 @@
     #include <stdbool.h>
     #include <termios.h>
 
-    #include "cr_string.h"
+    #include "string.h"
 
 typedef struct {
     buff_t input;
