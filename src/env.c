@@ -39,10 +39,14 @@ bool parse_env_populate(char **env, buff_t *env_values,
 
 void debug_env_entries(env_entry_t *env_entries, size_t env_size)
 {
+    size_t keylen;
+
     for (size_t i = 0; i < env_size; i++) {
+        keylen = strcspn(env_entries[i].ptr, "=") + 1;
         CR_DEBUG("Env entry [%01lu] key [%.*s] value [%.*s]\n", i,
-            (int)strcspn(env_entries[i].ptr, "="), env_entries[i].ptr,
-            (int)env_entries[i].size, env_entries[i].ptr);
+            (int)keylen - 1, env_entries[i].ptr,
+            (int)(env_entries[i].size - keylen),
+            env_entries[i].ptr + keylen);
     }
 }
 
@@ -58,6 +62,7 @@ bool parse_env(char **env, buff_t *env_values, env_entry_t *env_entries)
     bzero(env_values->str, sizeof *env_values->str * env_values->cap);
     parse_env_populate(env, env_values, env_entries);
     env_values->str[env_values->count] = '\0';
-    CR_DEBUG("Parsed env: %s\n", env_values->str);
+    CR_DEBUG("Parsed %zu env entries (%zu)\n",
+        count_env_entries(env), env_values->count);
     return true;
 }
