@@ -87,6 +87,7 @@ bool command_execute(args_t *command, char **env,
 
     if (command->args[0] == NULL)
         return false;
+    CR_DEBUG("argv[0] -> [%s]", command->args[0]);
     if (strcmp(command->args[0], "env") == 0)
         return execute_env(env);
     pid = fork();
@@ -96,7 +97,6 @@ bool command_execute(args_t *command, char **env,
             command_handler_errors(command->args[0]);
     } else if (pid > 0) {
         waitpid(pid, &status, 0);
-        exit(EXIT_SUCCESS);
         return true;
     }
     return false;

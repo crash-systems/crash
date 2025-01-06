@@ -66,7 +66,8 @@ bool shell_evaluate(repl_t *repl)
         return false;
     CR_DEBUG_CALL(show_command_args, &command);
     if (command.count > 0)
-        command_execute(&command, repl->env, NULL);
+        if (!command_execute(&command, repl->env, NULL))
+            repl->is_running = false;
     CR_DEBUG("cmd buff: (%zu)[%s]\n", repl->input.count, repl->input.str);
     free(command.args);
     return true;
