@@ -7,7 +7,7 @@
 
 #include "command.h"
 #include "common.h"
-#include "cr_string.h"
+#include "string.h"
 #include "debug.h"
 #include "repl.h"
 
