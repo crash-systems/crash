@@ -9,6 +9,8 @@
 
 #include "command.h"
 #include "debug.h"
+#include "env.h"
+#include "string.h"
 
 static
 int ensure_args_capacity(args_t *command)
@@ -59,14 +61,35 @@ void command_handler_errors(char *name)
     }
 }
 
+static
+bool execute_env(char **env)
+{
+    buff_t env_values = { 0 };
+    env_entry_t *env_entries = NULL;
+    size_t env_size = count_env_entries(env);
+
+    env_values.str = malloc(CR_BUFF_INIT_SZ);
+    if (env_values.str == NULL)
+        return false;
+    env_entries = malloc(sizeof *env_entries * env_size);
+    parse_env(env, &env_values, env_entries);
+    CR_DEBUG_CALL(debug_env_entries, env_entries, env_size);
+    free(env_values.str);
+    free(env_entries);
+    return true;
+}
+
 bool command_execute(args_t *command, char **env,
     __attribute__((unused)) char **path)
 {
     int status;
-    pid_t pid = fork();
+    pid_t pid;
 
     if (command->args[0] == NULL)
         return false;
+    if (strcmp(command->args[0], "env") == 0)
+        return execute_env(env);
+    pid = fork();
     if (pid == 0) {
         assert(command->args[0] != NULL);
         if (execve(command->args[0], command->args, env) == -1)

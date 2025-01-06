@@ -34,7 +34,6 @@ bool ensure_buff_av_capacity(buff_t *buff, size_t requested)
     if ((buff->count + requested) < buff->cap)
         return true;
     for (; endsize < buff->count + requested; endsize <<= 1);
-    CR_DEBUG("Reallocating to endsize: %zu\n", endsize);
     if (endsize > buff->cap) {
         new_str = realloc(buff->str, (sizeof *buff->str) * endsize);
         if (new_str == NULL)

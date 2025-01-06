@@ -8,26 +8,56 @@
 #include "env.h"
 #include "string.h"
 
-bool parse_env(char **env, buff_t *result)
+size_t count_env_entries(char **env)
+{
+    size_t result = 0;
+
+    for (; *env != NULL; env++)
+        result++;
+    return result;
+}
+
+static
+bool parse_env_populate(char **env, buff_t *env_values,
+    env_entry_t *env_entries)
 {
     size_t env_size = 0;
+    size_t i = 0;
 
-    if (result == NULL)
-        return false;
-    bzero(result, sizeof(buff_t));
-    result->str = malloc(sizeof *result->str * CR_BUFF_INIT_SZ);
-    if (result->str == NULL)
-        return false;
-    result->cap = CR_BUFF_INIT_SZ;
-    bzero(result->str, sizeof *result->str * result->cap);
     for (; *env != NULL; env++) {
         env_size = strlen(*env);
-        if (!ensure_buff_av_capacity(result, env_size))
+        if (!ensure_buff_av_capacity(env_values, env_size))
             return false;
-        memcpy(result->str + result->count, *env, env_size);
-        result->count += env_size;
+        env_entries[i].ptr = memcpy(env_values->str + env_values->count, *env,
+            env_size);
+        env_entries[i].size = env_size;
+        env_values->count += env_size;
+        i++;
     }
-    result->str[result->count] = '\0';
-    CR_DEBUG("Parsed env: %s\n", result->str);
+    return true;
+}
+
+void debug_env_entries(env_entry_t *env_entries, size_t env_size)
+{
+    for (size_t i = 0; i < env_size; i++) {
+        CR_DEBUG("Env entry [%01lu] key [%.*s] value [%s]\n", i,
+            (int)strcspn(env_entries[i].ptr, "="), env_entries[i].ptr,
+            env_entries[i].ptr);
+    }
+}
+
+bool parse_env(char **env, buff_t *env_values, env_entry_t *env_entries)
+{
+    if (env_values == NULL || env_entries == NULL)
+        return false;
+    bzero(env_values, sizeof(buff_t));
+    env_values->str = malloc(sizeof *env_values->str * CR_BUFF_INIT_SZ);
+    if (env_values->str == NULL)
+        return false;
+    env_values->cap = CR_BUFF_INIT_SZ;
+    bzero(env_values->str, sizeof *env_values->str * env_values->cap);
+    parse_env_populate(env, env_values, env_entries);
+    env_values->str[env_values->count] = '\0';
+    CR_DEBUG("Parsed env: %s\n", env_values->str);
     return true;
 }
