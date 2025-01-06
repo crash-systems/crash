@@ -16,7 +16,7 @@ int ensure_args_capacity(args_t *command)
     char **ptr = NULL;
 
     if (command->count == command->cap - 1) {
-        ptr = realloc(command->args, command->cap << 1);
+        ptr = realloc(command->args, sizeof *command * command->cap << 1);
         if (ptr == NULL)
             return 0;
         command->args = ptr;
@@ -59,7 +59,8 @@ void command_handler_errors(char *name)
     }
 }
 
-bool command_execute(args_t *command, char **env, char **path)
+bool command_execute(args_t *command, char **env,
+    __attribute__((unused)) char **path)
 {
     int status;
     pid_t pid = fork();
