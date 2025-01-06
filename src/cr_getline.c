@@ -68,7 +68,8 @@ bool cr_getline(buff_t *buff)
         if (*read_buff == CTRL('d'))
             return write(STDOUT_FILENO, SSTR_UNPACK("exit\n")), true;
         CR_DEBUG_CALL(show_input_buff, read_buff, read_size);
-        write(STDOUT_FILENO, read_buff, read_size);
+        if (str_printable(read_buff))
+            write(STDOUT_FILENO, read_buff, read_size);
         if (!ensure_buff_capacity(buff))
             return false;
         buff->count += strcpy_printable(buff->str + buff->count, read_buff);

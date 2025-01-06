@@ -17,7 +17,7 @@ typedef struct {
 } args_t;
 
 bool cr_getline(buff_t *buff);
+bool str_printable(char const *str);
 bool ensure_buff_capacity(buff_t *buff);
 bool ensure_buff_av_capacity(buff_t *buff, size_t requested);
-
 #endif

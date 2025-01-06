@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -41,5 +42,13 @@ bool ensure_buff_av_capacity(buff_t *buff, size_t requested)
         buff->str = new_str;
         buff->cap = endsize;
     }
+    return true;
+}
+
+bool str_printable(char const *str)
+{
+    for (; *str != '\0'; str++)
+        if (!isprint(*str))
+            return false;
     return true;
 }
