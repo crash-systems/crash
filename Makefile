@@ -104,7 +104,7 @@ endef
 AFL_PROCS ?= $(shell nproc)
 
 .PHONY: afl_run
-afl_run: afl_runner
+afl_run: afl
 	@ mkdir -p afl/generated
 	screen -dmS main_instance \
 		afl-fuzz $(AFL_FLAGS) -M fuzzer_1 -- ./afl_runner
