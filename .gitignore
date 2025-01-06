@@ -13,3 +13,6 @@ afl_runner
 # Config
 compile_commands.json
 .pre-commit-config.yaml
+
+## Debug
+.dbug
