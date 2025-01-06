@@ -40,9 +40,9 @@ bool parse_env_populate(char **env, buff_t *env_values,
 void debug_env_entries(env_entry_t *env_entries, size_t env_size)
 {
     for (size_t i = 0; i < env_size; i++) {
-        CR_DEBUG("Env entry [%01lu] key [%.*s] value [%s]\n", i,
+        CR_DEBUG("Env entry [%01lu] key [%.*s] value [%.*s]\n", i,
             (int)strcspn(env_entries[i].ptr, "="), env_entries[i].ptr,
-            env_entries[i].ptr);
+            (int)env_entries[i].size, env_entries[i].ptr);
     }
 }
 
