@@ -1,11 +1,12 @@
 .POSIX:
+.SUFFIXES:
 / := ./
 
 BUILD_DIR := $/.build
 
 CC := gcc
 
-CFLAGS := -std=gnu2x -pedantic
+CFLAGS := -std=gnu99 -pedantic
 CFLAGS += -iquote $/src
 
 WARNING_FILE := $/base_warnings
