@@ -61,18 +61,6 @@ args_t command_parse_args(char *buff)
 }
 
 static
-void command_handler_errors(char const *name)
-{
-    switch (errno) {
-        case ENOENT:
-            dprintf(STDERR_FILENO, "%s: Command not found.\n", name);
-            break;
-        default:
-            dprintf(STDERR_FILENO, "execve: Unknown error\n");
-    }
-}
-
-static
 bool execute_env(char **env)
 {
     buff_t env_values = { nullptr, .count = 0 };
@@ -120,7 +108,7 @@ bool shell_command_run_subprocess(repl_t *repl, args_t *command, char const *pat
         return true;
     }
     execve(path, command->args, repl->env);
-    command_handler_errors("crash");
+    fprintf(stderr, "crash: %s: %s\n", strerror(errno), command->args[0]);
     return true;
 }
 
@@ -192,7 +180,7 @@ char const *path_resolve(char *cmdpath, char const *cmd, char **env)
         return nullptr;
     if (stridx(cmd, '/') != -1)
         return path_append(cmdpath, cmd);
-    return nullptr;
+    return cmd;
 }
 
 bool command_execute(repl_t *repl, args_t *command)
