@@ -6,15 +6,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "./string.h"
 #include "debug.h"
 #include "env.h"
-#include "string.h"
 
 size_t count_env_entries(char **env)
 {
     size_t result = 0;
 
-    for (; *env != NULL; env++)
+    for (; *env != nullptr; env++)
         result++;
     return result;
 }
@@ -26,7 +26,7 @@ bool parse_env_populate(char **env, buff_t *env_values,
     size_t env_size = 0;
     size_t i = 0;
 
-    for (; *env != NULL; env++) {
+    for (; *env != nullptr; env++) {
         env_size = strlen(*env);
         if (!ensure_buff_av_capacity(env_values, env_size))
             return false;
@@ -54,14 +54,14 @@ void debug_env_entries(env_entry_t *env_entries, size_t env_size)
 
 bool parse_env(char **env, buff_t *env_values, env_entry_t *env_entries)
 {
-    if (env_values == NULL || env_entries == NULL)
+    if (env_values == nullptr || env_entries == nullptr)
         return false;
-    bzero(env_values, sizeof(buff_t));
+    memset(env_values, 0, sizeof(buff_t));
     env_values->str = malloc(sizeof *env_values->str * CR_BUFF_INIT_SZ);
-    if (env_values->str == NULL)
+    if (env_values->str == nullptr)
         return false;
     env_values->cap = CR_BUFF_INIT_SZ;
-    bzero(env_values->str, sizeof *env_values->str * env_values->cap);
+    memset(env_values->str, 0, sizeof *env_values->str * env_values->cap);
     parse_env_populate(env, env_values, env_entries);
     env_values->str[env_values->count] = '\0';
     CR_DEBUG("Parsed %zu env entries (%zu)\n",

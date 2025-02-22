@@ -2,23 +2,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "debug.h"
 #include "string.h"
 
 bool ensure_buff_capacity(buff_t *buff)
 {
     char *new_str;
 
-    if (buff->str == NULL) {
+    if (buff->str == nullptr) {
         new_str = malloc((sizeof *buff->str) * CR_BUFF_INIT_SZ);
-        if (new_str == NULL)
+        if (new_str == nullptr)
             return false;
         buff->str = new_str;
         buff->cap = CR_BUFF_INIT_SZ;
     }
     if (buff->count == buff->cap) {
         new_str = realloc(buff->str, (sizeof *buff->str) * buff->cap << 1);
-        if (new_str == NULL)
+        if (new_str == nullptr)
             return false;
         buff->str = new_str;
         buff->cap <<= 1;
@@ -36,7 +35,7 @@ bool ensure_buff_av_capacity(buff_t *buff, size_t requested)
     for (; endsize < buff->count + requested; endsize <<= 1);
     if (endsize > buff->cap) {
         new_str = realloc(buff->str, (sizeof *buff->str) * endsize);
-        if (new_str == NULL)
+        if (new_str == nullptr)
             return false;
         buff->str = new_str;
         buff->cap = endsize;

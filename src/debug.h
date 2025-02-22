@@ -1,6 +1,8 @@
 #ifndef CR_DEBUG_H
     #define CR_DEBUG_H
 
+    #include <stdio.h> /* IWYU pragma: export */
+
     #include "vt100_esc_codes.h"
 
     #define OMIT /* omitted */

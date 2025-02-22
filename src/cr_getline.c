@@ -1,29 +1,29 @@
-#define _GNU_SOURCE
-
 #include <ctype.h>
-#include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
 
+#include "./string.h"
 #include "common.h"
 #include "debug.h"
-#include "string.h"
 
+#define ctrl(x) (x & 0xf)
+
+#if defined(CR_DEBUG_MODE)
 static void show_input_buff(char const buff[static 1], size_t written)
 {
     CR_DEBUG("read %zd characters: [", written);
     for (size_t i = 0; i < written; i++) {
         if (i)
-            dprintf(STDERR_FILENO, " ");
-        dprintf(STDERR_FILENO, "%.2x", buff[i]);
+            fprintf(stderr, " ");
+        fprintf(stderr, "%.2x", buff[i]);
     }
-    dprintf(STDERR_FILENO, "]\n");
+    fprintf(stderr, "]\n");
     if (*buff == '\033')
         CR_DEBUG("Detected ascii sequence: [\\033%s]\n", &buff[1]);
 }
+#endif
 
 static
 size_t strcpy_printable(char *dest, char *src)
@@ -58,7 +58,7 @@ bool cr_getline(buff_t *buff)
     if (!ensure_buff_capacity(buff))
         return false;
     while (*read_buff != '\n' && *read_buff != '\r') {
-        bzero(read_buff, sizeof read_buff);
+        memset(read_buff, '\0', sizeof read_buff);
         read_size = read(STDIN_FILENO, &read_buff, sizeof read_buff);
         CR_DEBUG("read count: %zd\n", read_size);
         if (read_size < 0)
@@ -67,7 +67,7 @@ bool cr_getline(buff_t *buff)
             buff->count = 0;
             return true;
         }
-        if (*read_buff == CTRL('d'))
+        if (*read_buff == ctrl('d'))
             return write(STDOUT_FILENO, SSTR_UNPACK("exit\n")), true;
         CR_DEBUG_CALL(show_input_buff, read_buff, read_size);
         if (str_printable(read_buff))

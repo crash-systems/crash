@@ -1,7 +1,9 @@
 #ifndef CR_STRING_H
     #define CR_STRING_H
+
     #include <stdbool.h>
     #include <stddef.h>
+
     #define CR_BUFF_INIT_SZ 128
 
 typedef struct {

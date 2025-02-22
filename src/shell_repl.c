@@ -5,9 +5,9 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "./string.h"
 #include "command.h"
 #include "common.h"
-#include "string.h"
 #include "debug.h"
 #include "repl.h"
 
@@ -19,8 +19,8 @@ static void show_command_args(args_t *command)
     CR_DEBUG("command count %zu\n", command->count);
     CR_DEBUG_MSG("cmd args: ");
     for (size_t i = 0; i < command->count; i++)
-        dprintf(STDERR_FILENO, "[%s] ", command->args[i]);
-    dprintf(STDERR_FILENO, "\n");
+        fprintf(stderr, "[%s] ", command->args[i]);
+    fprintf(stderr, "\n");
 }
 #endif
 
@@ -29,7 +29,7 @@ bool shell_repl_initialize(repl_t *repl)
     struct termios repl_settings;
 
     repl->is_running = true;
-    repl->input = (buff_t){ .str = NULL, .cap = 0, .count = 0 };
+    repl->input = (buff_t){ .str = nullptr, .cap = 0, .count = 0 };
     repl->is_atty = isatty(STDIN_FILENO);
     if (isatty(repl->is_atty)) {
         tcgetattr(STDIN_FILENO, &repl_settings);
@@ -62,7 +62,7 @@ bool shell_evaluate(repl_t *repl)
 {
     args_t command = command_parse_args(repl->input.str);
 
-    if (command.args == NULL)
+    if (command.args == nullptr)
         return false;
     CR_DEBUG_CALL(show_command_args, &command);
     if (command.count > 0)
