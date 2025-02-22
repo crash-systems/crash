@@ -9,6 +9,8 @@
 #include "debug.h"
 #include "repl.h"
 
+#include <sysexits.h>
+
 #if defined(CR_DEBUG_MODE)
     #include <stdio.h>
     #include <sys/ioctl.h>
@@ -34,7 +36,7 @@ size_t strcpy_printable(char *dest, char const *src, size_t n)
 static
 bool append_null_terminator(buff_t *buff)
 {
-    if (!ensure_buff_capacity(buff))
+    if (!ensure_buff_av_capacity(buff, 1))
         return false;
     buff->str[buff->count] = '\0';
     buff->count++;
@@ -70,8 +72,10 @@ bool cr_getline(buff_t *buff)
             buff->count = 0;
             return true;
         }
-        if (*read_buff == ctrl('d'))
+        if (*read_buff == ctrl('d')) {
+            buff->count = 0;
             return write(STDOUT_FILENO, SSTR_UNPACK("exit\n")), true;
+        }
 #if defined(CR_DEBUG_MODE)
         CR_DEBUG("read %zd characters: [", read_size);
         for (ssize_t i = 0; i < read_size; i++) {

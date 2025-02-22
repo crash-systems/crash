@@ -32,11 +32,10 @@ bool shell_repl_initialize(repl_t *repl)
 
 bool shell_readline(repl_t *repl)
 {
-    bool succeed;
-
     repl->input.count = 0;
     write(STDOUT_FILENO, SSTR_UNPACK(PROMPT));
-    succeed = cr_getline(&repl->input);
+    if (!cr_getline(&repl->input))
+        return false;
     CR_DEBUG("input length: [%zu]\n", repl->input.count);
     if (repl->input.count == 0) {
         repl->is_running = false;
@@ -44,7 +43,7 @@ bool shell_readline(repl_t *repl)
     }
     write(STDOUT_FILENO, "\n", 1);
     CR_DEBUG("cmd buff: [%s]\n", repl->input.str);
-    return succeed;
+    return true;
 }
 
 bool shell_evaluate(repl_t *repl)
@@ -53,7 +52,7 @@ bool shell_evaluate(repl_t *repl)
 
     if (command.args == nullptr)
         return false;
-#if defined(CR_DEBUG_CALL)
+#if defined(CR_DEBUG_MODE)
     CR_DEBUG("command count %zu\n", command.count);
     CR_DEBUG_MSG("cmd args: ");
     for (size_t i = 0; i < command.count; i++)

@@ -81,7 +81,7 @@ help: #? help: Show this help message
 install: $(out_release)
 	install -Dm755 -t $(PREFIX)/bin $(out_release)
 
-$(eval $(call mk-profile, afl_runner, tests))
+$(eval $(call mk-profile, afl_runner, afl))
 
 #? afl: compile fuzzer binary
 .PHONY: afl

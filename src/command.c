@@ -19,8 +19,8 @@
 #include "common.h"
 #include "debug.h"
 #include "env.h"
-#include "repl.h"
 #include "exit.h"
+#include "repl.h"
 
 static
 int ensure_args_capacity(args_t *command)
@@ -108,7 +108,12 @@ bool shell_command_run_subprocess(repl_t *repl, args_t *command, char const *pat
         repl->status = WEXITSTATUS(repl->status);
         return true;
     }
+#if defined(AFL_RUNNER)
+    printf("plop [%s]\n", command->args[0]);
+    exit(0);
+#else
     execve(path, command->args, repl->env);
+#endif
     fprintf(stderr, "crash: %s: %s\n", strerror(errno), command->args[0]);
     exit(CR_NOTFOUND);
     return true;
