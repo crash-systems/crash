@@ -21,7 +21,7 @@ stdenv.mkDerivation {
     description = "Crash resilient auspicious shell.";
     maintainers = with lib.maintainers; [savalet sigmanificient];
     license = lib.licenses.mit;
-    platforms = lib.platforms.linux;
+    platforms = [lib.platforms.linux "aarch64-darwin"];
     mainProgram = "crash";
   };
 }

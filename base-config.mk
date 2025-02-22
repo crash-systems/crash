@@ -3,7 +3,11 @@ KERNEL := $(shell uname)
 / ?= ./
 BUILD := $/.build
 
+ifeq ($(KERNEL),Darwin)
+CC := clang
+else
 CC := gcc
+endif
 LD := $(CC)
 
 AR ?= ar

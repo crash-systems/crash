@@ -3,6 +3,7 @@
 
 ## build
 .build
+result
 
 ## binairies
 crash
@@ -16,3 +17,6 @@ compile_commands.json
 
 ## Debug
 .dbug
+
+# Cache
+.cache
