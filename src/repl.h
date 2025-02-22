@@ -12,6 +12,7 @@ typedef struct {
     bool is_running;
     char **env;
     struct termios saved_term_settings;
+    int status;
 } repl_t;
 
 bool shell_repl_initialize(repl_t *repl);

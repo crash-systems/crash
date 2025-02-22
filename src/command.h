@@ -1,10 +1,11 @@
 #ifndef COMMAND_H_
     #define COMMAND_H_
-    #include "string.h"
     #include <stdbool.h>
 
-bool command_execute(args_t *command, char **env, char **path)
-__attribute__((nonnull(1, 2)));
+    #include "repl.h"
+    #include "string.h"
+
+bool command_execute(repl_t *repl, args_t *command);
 
 args_t command_parse_args(char *buff);
 #endif

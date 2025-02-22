@@ -6,11 +6,13 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <linux/limits.h>
 
 #include "command.h"
+#include "common.h"
 #include "debug.h"
 #include "env.h"
-#include "string.h"
+#include "repl.h"
 
 static
 int ensure_args_capacity(args_t *command)
@@ -50,7 +52,7 @@ args_t command_parse_args(char *buff)
 }
 
 static
-void command_handler_errors(char *name)
+void command_handler_errors(char const *name)
 {
     switch (errno) {
         case ENOENT:
@@ -79,25 +81,119 @@ bool execute_env(char **env)
     return true;
 }
 
-bool command_execute(args_t *command, char **env,
-    __attribute__((unused)) char **path)
+static
+void shell_command_show_signal(int rstatus)
 {
-    int status;
-    pid_t pid;
+    if (!WIFEXITED(rstatus) && WIFSIGNALED(rstatus)) {
+        if (WTERMSIG(rstatus) != W_STOPCODE(rstatus))
+            dprintf(STDERR_FILENO, "%s", strsignal(WTERMSIG(rstatus)));
+        else
+            write(STDERR_FILENO, SSTR_UNPACK("Floating exception"));
+        if (WCOREDUMP(rstatus))
+            write(STDERR_FILENO, SSTR_UNPACK(" (core dumped)"));
+        write(STDERR_FILENO, SSTR_UNPACK("\n"));
+    }
+}
+
+static
+bool shell_command_run_subprocess(repl_t *repl, args_t *command, char const *path)
+{
+    pid_t pid = fork();
+
+    if (pid < 0)
+        return -1;
+    CR_DEBUG("PID [%d | %d]", pid, getpid());
+    if (pid) {
+        waitpid(pid, &repl->status, 0);
+        CR_DEBUG("Full exit status %d", repl->status);
+        shell_command_show_signal(repl->status);
+        repl->status = WEXITSTATUS(repl->status);
+        return true;
+    }
+    execve(path, command->args, repl->env);
+    command_handler_errors("crash");
+    return true;
+}
+
+static
+char *path_append(char *absp, char const *leaf)
+{
+    size_t len = strlen(absp);
+    size_t leaf_len = strlen(leaf);
+
+    if (absp[len - 1] == '/')
+        len--;
+    if ((PATH_MAX - len) <= len)
+        return NULL;
+    absp[len] = '/';
+    memcpy(absp + len + 1, leaf, (leaf_len + 1) * sizeof(char));
+    return absp;
+}
+
+
+static
+char *search_in_env_path(char **env, char *path, const char *filename)
+{
+    size_t len;
+    const char *search;
+
+    // TODO: use a env retriver
+    for (; strncmp(*env, "PATH=", 5) != 0; env++);
+    search = *env;
+
+    for (; search != NULL;) {
+        for (; *search == ':'; search++);
+        if (*search == '\0')
+            return NULL;
+        len = strcspn(search, ":");
+        CR_DEBUG("search: [%.*s]", (int)len, search);
+        memcpy(path, search, len * sizeof(char));
+        path[len] = '\0';
+        path_append(path, filename);
+        if (!access(path, F_OK))
+            return path;
+        search = strchr(search, ':');
+    }
+    return NULL;
+}
+
+static
+int stridx(const char *str, char c)
+{
+    for (const char *p = str; *p != '\0'; p++)
+        if (*p == c)
+            return p - str;
+    return -1;
+}
+
+static
+char const *path_resolve(char *cmdpath, char const *cmd, char **env)
+{
+    if (*cmd == '/')
+        return cmd;
+    if (!strncmp(cmd, "./", 2)) {
+       if (getcwd(cmdpath, PATH_MAX) != NULL)
+            return path_append(cmdpath, cmd);
+    }
+    if (search_in_env_path(env, cmdpath, cmd) != NULL)
+        return cmdpath;
+    if (getcwd(cmdpath, PATH_MAX) == NULL)
+        return NULL;
+    if (stridx(cmd, '/') != -1)
+        return path_append(cmdpath, cmd);
+    return NULL;
+}
+
+bool command_execute(repl_t *repl, args_t *command)
+{
+    char buff[PATH_MAX];
+    char const *cmdpath;
 
     if (command->args[0] == NULL)
         return false;
     CR_DEBUG("argv[0] -> [%s]", command->args[0]);
     if (strcmp(command->args[0], "env") == 0)
-        return execute_env(env);
-    pid = fork();
-    if (pid == 0) {
-        assert(command->args[0] != NULL);
-        if (execve(command->args[0], command->args, env) == -1)
-            command_handler_errors(command->args[0]);
-    } else if (pid > 0) {
-        waitpid(pid, &status, 0);
-        return true;
-    }
-    return false;
+        return execute_env(repl->env);
+    cmdpath = path_resolve(buff, command->args[0], repl->env);
+    return shell_command_run_subprocess(repl, command, cmdpath);
 }
