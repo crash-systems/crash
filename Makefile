@@ -1,97 +1,92 @@
-.POSIX:
-.SUFFIXES:
-/ := ./
+# ↓ Compiler configuration
+include $/base-config.mk
 
-BUILD_DIR := $/.build
+SRC := $(shell find src -type f -name "*.c")
 
-CC := gcc
-
-CFLAGS := -std=gnu99 -pedantic
-CFLAGS += -iquote $/src
-
-WARNING_FILE := $/base_warnings
-
-ifneq ($(EXPLICIT_FLAGS),1)
-CFLAGS += @$(WARNING_FILE)
-else
-CFLAGS += $(shell cat $(WARNING_FILE))
-endif
-
-ifneq ($(V),1)
-Q := @
-endif
-
-LDFLAGS := -fwhole-program
-LDFLAGS += -Wl,--gc-sections
-
-LDLIBS += -lc
-
-SRC := $(shell find $/src -type f -name "*.c" -printf '%P\n')
-vpath  %.c $/src
-
-ifneq (,$(shell find . -maxdepth 1 -type f -name ".fast"))
-MAKEFLAGS += -j
-endif
-
-#? (default): build the release binary
-.PHONY: _start
+#? (default): Build the nanotekspice
+.PHONY: _start all
 _start: all
 
-include $/mk-recipes.mk
+# call mk-profile bin-name, profile
+define mk-profile
 
-release-flags := -O3 -DNDEBUG
-#? crash: build the release binary, crash
-$(eval $(call mk-recipe-binary, crash, SRC, $(release-flags)))
+out_$(strip $2) := $1
+obj_$(strip $2) := $$(SRC:%.c=$$(BUILD)/$(strip $2)/%.o)
 
-#? debug: build with debug logs an eponym binary
-debug-flags := -O2 -fanalyzer -DCR_DEBUG_MODE=1 -g3
+$$(BUILD)/$(strip $2)/%.o: %.c
+	@ mkdir -p $$(dir $$@)
+	$$(COMPILE.c) $$< -o $$@
+	@ $$(log) "$$(cyan) CC $$(purple) $$(notdir $$@) $$(reset)"
 
-$(eval $(call mk-recipe-binary, debug, SRC, $(debug-flags)))
+$$(out_$(strip $2)): CFLAGS += $$(CFLAGS_$(strip $2))
+$$(out_$(strip $2)): $$(obj_$(strip $2))
+	$$(LINK.c) $$^ $$(LDFLAGS) $$(LDLIBS) -o $$@
+	@ $$(log) "$$(cyan) CC $$(green) $$(notdir $$@) $$(reset)"
 
-#? check: build with all warnings and sanitizers an eponym binary
-check-flags := $(debug-flags) -fsanitize=address,leak,undefined -Wpadded
-$(eval $(call mk-recipe-binary, check, SRC, $(check-flags)))
+every_o += $$(obj_$(strip $2))
+every_bin += $$(out_$(strip $2))
+
+endef
+
+#? crash: Build the shell
+#? debug: Build a developer version
+#? tests: Build the test suite
+$(eval $(call mk-profile, crash, release))
+$(eval $(call mk-profile, debug, debug))
+$(eval $(call mk-profile, test_suite, tests))
 
 .PHONY: all
-all: $(out-crash)
+all: $(out_release)
+
+.PHONY: bundle #? bundle: build all afformentioned binaries
+bundle: $(every_bin)
+
+.PHONY: tests_run
+tests_run: $(out_tests)
+	- ./$^
+
+.PHONY: cov #? cov: Run test suite and report coverage metrics
+cov: cov_base_flags := --exclude-unreachable-branches
+cov: cov_base_flags += --exclude tests --exclude-directories .direnv
+cov: tests_run
+	gcovr . $(cov_base_flags)
+	gcovr . $(cov_base_flags) --txt-metric branch
+	gcovr . --html-details html/
 
 .PHONY: clean
-clean: #? clean: removes object files
-	@ $(log) "$(yellow)RM$(reset) OBJS"
-	@ $(RM) -r $(_clean)
+clean: #? clean: Remove generated compiled files
+	$(RM) $(every_o)
 
 .PHONY: fclean
-fclean: clean #? fclean: remove binaries and object files
-	@ $(log) "$(yellow)RM$(reset) $(notdir $(_fclean))"
-	@ $(RM) -r $(_fclean)
+fclean: clean #? clean: Remove generated compiled file
+	$(RM) $(every_bin)
 
-.PHONY: distclean #? distclean: remove all build artifacts
-distclean: fclean
-distclean:
-	@ $(log) "$(yellow)RM$(reset) $(BUILD_DIR)"
-	@ $(RM) -r $(BUILD_DIR)
-
-.PHONY: re
+.PHONY: re #? clean: Remove generated compiled file
+re:	fclean all
 .NOTPARALLEL: re
-re: fclean all #? re: rebuild the default target
+
+.PHONY: mrproper #? mrproper: (almost) Full repository cleanup
+mrproper: fclean
+	$(RM) -r $(BUILD)
+	$(RM) -r .cache result $(CC_JSON)
 
 .PHONY: help
-help: #? help: show this help message
+help: #? help: Show this help message
 	@ grep -P "#[?] " $(MAKEFILE_LIST)          \
       | sed -E 's/.*#\? ([^:]+): (.*)/\1 "\2"/' \
-	  | xargs printf "  $(blue)%-12s$(reset): $(cyan)%s$(reset)\n"
+	  | xargs printf "%-12s: %s\n"
 
 #? install: package within the provided dir
 .PHONY: install
-install: $(out-crash)
-	install -Dm755 -t $(PREFIX)/bin $(out-crash)
+install: $(out_release)
+	install -Dm755 -t $(PREFIX)/bin $(out_release)
 
-$(eval $(call mk-recipe-binary, afl_runner, SRC, $(debug-flags)))
+$(eval $(call mk-profile, afl_runner, tests))
 
 #? afl: compile fuzzer binary
 .PHONY: afl
 afl: CC := AFL_USE_ASAN=1 afl-gcc-fast
-afl: afl_runner
+afl: $(out_afl)
 
 AFL_FLAGS := -i afl/input
 AFL_FLAGS += -x afl/tokens

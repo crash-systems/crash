@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
