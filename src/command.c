@@ -20,6 +20,7 @@
 #include "debug.h"
 #include "env.h"
 #include "repl.h"
+#include "exit.h"
 
 static
 int ensure_args_capacity(args_t *command)
@@ -109,6 +110,7 @@ bool shell_command_run_subprocess(repl_t *repl, args_t *command, char const *pat
     }
     execve(path, command->args, repl->env);
     fprintf(stderr, "crash: %s: %s\n", strerror(errno), command->args[0]);
+    exit(CR_NOTFOUND);
     return true;
 }
 
