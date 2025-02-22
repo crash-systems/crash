@@ -135,6 +135,9 @@ char *path_append(char *absp, char const *leaf)
     if ((PATH_MAX - len) <= len)
         return nullptr;
     absp[len] = '/';
+
+    if ((PATH_MAX - len) <= leaf_len)
+        return nullptr;
     memcpy(absp + len + 1, leaf, (leaf_len + 1) * sizeof(char));
     return absp;
 }

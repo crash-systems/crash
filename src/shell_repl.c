@@ -13,17 +13,6 @@
 
 char const PROMPT[] = "->> ";
 
-#if defined CR_DEBUG_MODE
-static void show_command_args(args_t *command)
-{
-    CR_DEBUG("command count %zu\n", command->count);
-    CR_DEBUG_MSG("cmd args: ");
-    for (size_t i = 0; i < command->count; i++)
-        fprintf(stderr, "[%s] ", command->args[i]);
-    fprintf(stderr, "\n");
-}
-#endif
-
 bool shell_repl_initialize(repl_t *repl)
 {
     struct termios repl_settings;
@@ -64,7 +53,13 @@ bool shell_evaluate(repl_t *repl)
 
     if (command.args == nullptr)
         return false;
-    CR_DEBUG_CALL(show_command_args, &command);
+#if defined(CR_DEBUG_CALL)
+    CR_DEBUG("command count %zu\n", command.count);
+    CR_DEBUG_MSG("cmd args: ");
+    for (size_t i = 0; i < command.count; i++)
+        fprintf(stderr, "[%s] ", command.args[i]);
+    fprintf(stderr, "\n");
+#endif
     if (command.count > 0)
         if (!command_execute(repl, &command))
             repl->is_running = false;

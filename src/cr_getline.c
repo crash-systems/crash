@@ -17,13 +17,13 @@
 #define ctrl(x) (x & 0xf)
 
 static
-size_t strcpy_printable(char *dest, char *src)
+size_t strcpy_printable(char *dest, char const *src, size_t n)
 {
     size_t count = 0;
 
-    for (; *src != '\0'; src++) {
-        if (isprint(*src)) {
-            *dest = *src;
+    for (size_t i = 0; i < n; i++) {
+        if (isprint(src[i])) {
+            *dest = src[i];
             count++;
             dest++;
         }
@@ -50,7 +50,7 @@ bool cr_getline(buff_t *buff)
         return false;
     while (*read_buff != '\n' && *read_buff != '\r') {
         memset(read_buff, '\0', sizeof read_buff);
-        read_size = read(STDIN_FILENO, &read_buff, sizeof read_buff);
+        read_size = read(STDIN_FILENO, &read_buff, sizeof read_buff - 1);
 #if defined(CR_DEBUG_MODE)
         struct winsize w;
         ioctl(0, TIOCGWINSZ, &w);
@@ -86,11 +86,11 @@ bool cr_getline(buff_t *buff)
         // print back the pompt
         fprintf(stderr, "%s%.*s", PROMPT, (int)buff->count, buff->str);
 #endif
-        if (str_printable(read_buff))
+        if (str_printable(read_buff, read_size))
             write(STDOUT_FILENO, read_buff, read_size);
-        if (!ensure_buff_capacity(buff))
+        if (!ensure_buff_av_capacity(buff, read_size))
             return false;
-        buff->count += strcpy_printable(buff->str + buff->count, read_buff);
+        buff->count += strcpy_printable(buff->str + buff->count, read_buff, read_size);
     }
     CR_DEBUG("buff count: %zu\n", buff->count);
     return append_null_terminator(buff);
