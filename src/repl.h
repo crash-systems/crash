@@ -15,6 +15,8 @@ typedef struct {
     int status;
 } repl_t;
 
+extern char const PROMPT[];
+
 bool shell_repl_initialize(repl_t *repl);
 void shell_cleanup(repl_t *repl);
 bool shell_readline(repl_t *repl);

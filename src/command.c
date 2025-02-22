@@ -8,10 +8,11 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#if __has_include(<linux/limits>)
-#include <linux/limits.h>
+
+#if __has_include(<linux/limits.h>)
+    #include <linux/limits.h>
 #else
-#define PATH_MAX 4096
+    #define PATH_MAX 4096
 #endif
 
 #include "command.h"

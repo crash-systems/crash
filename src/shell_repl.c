@@ -11,7 +11,7 @@
 #include "debug.h"
 #include "repl.h"
 
-static char const PROMPT[] = "->> ";
+char const PROMPT[] = "->> ";
 
 #if defined CR_DEBUG_MODE
 static void show_command_args(args_t *command)

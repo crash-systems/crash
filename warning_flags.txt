@@ -13,12 +13,11 @@
 -Wstrict-prototypes
 -Wunreachable-code
 -Wno-discarded-qualifiers
+-Wno-unknown-warning-option
 
--Werror=declaration-after-statement
 -Werror=format-nonliteral
 -Werror=int-conversion
 -Werror=return-type
 -Werror=vla-larger-than=0
 -Werror=write-strings
 -Werror=shadow
--Wno-unknown-warning-option
