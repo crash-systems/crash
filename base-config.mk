@@ -1,3 +1,5 @@
+KERNEL := $(shell uname)
+
 / ?= ./
 BUILD := $/.build
 
@@ -11,10 +13,13 @@ CFLAGS := -std=c2x -pedantic
 CFLAGS += -iquote $/include
 CFLAGS += $(shell cat $/warning_flags.txt)
 
-CFLAGS_release := -O2 -DNEBUG -fomit-frame-pointer -fanalyzer
+CFLAGS_release := -O2 -DNEBUG -fomit-frame-pointer
 CFLAGS_bonus := $(CXXFLAGS_release)
 
-CFLAGS_debug := -g3 -fsanitize=address,leak,undefined -DCR_DEBUG_MODE=1
+CFLAGS_debug := -g3 -fsanitize=address,undefined -DCR_DEBUG_MODE=1
+ifneq ($(KERNEL),Darwin)
+	CFLAGS_debug += -fsanitize=leak
+endif
 CFLAGS_cov := --coverage -g3
 
 LDLIBS :=

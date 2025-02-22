@@ -134,4 +134,8 @@ TIME_MS = $(shell expr $(call TIME_NS))
 
 BOXIFY = "[$(blue)$(1)$(reset)] $(2)"
 
+ifneq ($(shell uname),Darwin)
 log = printf $(call BOXIFY, %6s , %b\n) "$(call TIME_MS)"
+else
+log = printf "%b\n"
+endif
