@@ -37,8 +37,9 @@
         hardeningDisable = ["fortify"];
         packages = with pkgs; [
           gcc
-          python3Packages.compiledb
+          compiledb
           gcovr
+          screen
         ];
       };
     });
