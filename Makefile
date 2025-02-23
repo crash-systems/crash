@@ -83,6 +83,9 @@ install: $(out_release)
 
 $(eval $(call mk-profile, afl_runner, afl))
 
+CFLAGS_check := $(CFLAGS_afl) $(CFLAGS_debug)
+$(eval $(call mk-profile, check, check))
+
 #? afl: compile fuzzer binary
 .PHONY: afl
 afl: CC := AFL_USE_ASAN=1 afl-gcc-fast
@@ -97,14 +100,14 @@ define newline
 
 endef
 
-AFL_PROCS ?= $(shell nproc)
+PROCS ?= $(shell nproc)
 
 .PHONY: afl_run
 afl_run: afl
 	@ mkdir -p afl/generated
 	screen -dmS main_instance \
 		afl-fuzz $(AFL_FLAGS) -M fuzzer_1 -- ./afl_runner
-	$(foreach instance, $(shell seq 1 $(AFL_PROCS)),\
+	$(foreach instance, $(shell seq 1 $(PROCS)),\
 		screen -dmS afl_$(instance) \
 		afl-fuzz $(AFL_FLAGS) -S fuzzer_$(instance) -- ./afl_runner$(newline))
 	watch -n 0.25 -- afl-whatsup -s afl/generated

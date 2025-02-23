@@ -57,13 +57,15 @@ bool cr_getline(buff_t *buff)
         struct winsize w;
         ioctl(0, TIOCGWINSZ, &w);
 
-        size_t erase = strlen(PROMPT) + buff->count;
-        size_t line_count = erase / w.ws_col;
+        if (w.ws_col > 0) {
+            size_t erase = strlen(PROMPT) + buff->count;
+            size_t line_count = erase / w.ws_col;
 
-        // delete the prompt to allow proper debug logs
-        if (erase > w.ws_col)
-            fprintf(stderr, "\033[%zuA", line_count);
-        fprintf(stderr, "\033[0G\033[0J");
+            // delete the prompt to allow proper debug logs
+            if (erase > w.ws_col)
+                fprintf(stderr, "\033[%zuA", line_count);
+            fprintf(stderr, "\033[0G\033[0J");
+        }
         CR_DEBUG("read count: %zd\n", read_size);
 #endif
         if (read_size < 0)

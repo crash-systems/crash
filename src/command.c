@@ -131,9 +131,10 @@ char *path_append(char *absp, char const *leaf)
         return nullptr;
     absp[len] = '/';
 
+    leaf_len++;
     if ((PATH_MAX - len) <= leaf_len)
         return nullptr;
-    memcpy(absp + len + 1, leaf, (leaf_len + 1) * sizeof(char));
+    memcpy(absp + len + 1, leaf, leaf_len * sizeof(char));
     return absp;
 }
 
@@ -200,6 +201,7 @@ bool command_execute(repl_t *repl, args_t *command)
     CR_DEBUG("argv[0] -> [%s]\n", command->args[0]);
     if (strcmp(command->args[0], "env") == 0)
         return execute_env(repl->env);
+    memset(buff, '\0', sizeof buff);
     cmdpath = path_resolve(buff, command->args[0], repl->env);
     return shell_command_run_subprocess(repl, command, cmdpath);
 }
