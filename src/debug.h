@@ -30,7 +30,7 @@
         #define CR_DEBUG(fmt, ...) OMIT
 
         #define CR_DEBUG_CALL(func, ...) OMIT
-        #define CR_DEBUG_USED __attribute__((unused))
+        #define CR_DEBUG_USED [[gnu::unused]]
 
         #define DEBUG_SINK_FD OMIT
         #define DEBUG_SINK -1
