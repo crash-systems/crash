@@ -1,15 +1,15 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sysexits.h>
 #include <termios.h>
 #include <unistd.h>
 
-#include "./string.h"
 #include "common.h"
 #include "debug.h"
 #include "repl.h"
+#include "string.h"
 
-#include <sysexits.h>
 
 #if defined(CR_DEBUG_MODE)
     #include <stdio.h>

@@ -1,11 +1,9 @@
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <termios.h>
 #include <unistd.h>
 
-#include "./string.h"
+#include "string.h"
 #include "command.h"
 #include "common.h"
 #include "debug.h"

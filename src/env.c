@@ -41,7 +41,7 @@ bool parse_env_populate(char **env, buff_t *env_values,
 
 void debug_env_entries(env_entry_t *env_entries, size_t env_size)
 {
-    size_t keylen;
+    size_t keylen[[gnu::unused]]; // Used only in debug mode
 
     for (size_t i = 0; i < env_size; i++) {
         keylen = strcspn(env_entries[i].ptr, "=") + 1;
