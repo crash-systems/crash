@@ -3,11 +3,11 @@ include $/base-config.mk
 
 SRC := $(shell find src -type f -name "*.c")
 
-#? (default): Build the nanotekspice
+#? (default): Build crash
 .PHONY: _start all
 _start: all
 
-# call mk-profile bin-name, profile
+# call mk-profile bin-name, additional flags, profile
 define mk-profile
 
 out_$(strip $2) := $1

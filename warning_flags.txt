@@ -13,7 +13,6 @@
 -Wstrict-prototypes
 -Wunreachable-code
 -Wno-discarded-qualifiers
--Wno-unknown-warning-option
 
 -Werror=format-nonliteral
 -Werror=int-conversion
